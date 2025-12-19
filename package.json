@@ -1,0 +1,31 @@
+{
+  "name": "ai-chat",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@ai-sdk/anthropic": "^2.0.56",
+    "@mastra/core": "^0.24.9",
+    "@prisma/client": "^7.2.0",
+    "hono": "^4.11.1",
+    "next": "^15.1.8",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "^15.1.8",
+    "postcss": "^8",
+    "prisma": "^7.2.0",
+    "tailwindcss": "^4.0.0",
+    "typescript": "^5"
+  }
+}

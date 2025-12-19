@@ -13,33 +13,33 @@
 ## フェーズ1: 環境セットアップ
 
 ### 1.1 プロジェクト初期化
-- [ ] Next.jsプロジェクトの作成
+- [x] Next.jsプロジェクトの作成
   ```bash
   npx create-next-app@latest . --typescript --tailwind --app --no-src-dir
   ```
-- [ ] パッケージマネージャーの選択（npm推奨）
-- [ ] Git管理の確認（既に完了）
+- [x] パッケージマネージャーの選択（npm推奨）
+- [x] Git管理の確認（既に完了）
 
 ### 1.2 依存パッケージのインストール
-- [ ] Core依存関係
+- [x] Core依存関係
   ```bash
-  npm install @anthropic-ai/sdk
-  npm install @mastra/core @mastra/anthropic
+  npm install @ai-sdk/anthropic
+  npm install @mastra/core
   npm install hono
   npm install @prisma/client
   ```
-- [ ] 開発依存関係
+- [x] 開発依存関係
   ```bash
   npm install -D prisma
   npm install -D @types/node
   ```
 
 ### 1.3 環境変数設定
-- [ ] `.env.local`ファイルの作成
-- [ ] 環境変数の設定
+- [x] `.env.local`ファイルの作成
+- [x] 環境変数の設定
   - `ANTHROPIC_API_KEY`
   - `DATABASE_URL` (MongoDB接続文字列)
-- [ ] `.env.example`ファイルの作成（テンプレート用）
+- [x] `.env.example`ファイルの作成（テンプレート用）
 
 ---
 
