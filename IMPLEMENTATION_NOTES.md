@@ -78,5 +78,99 @@ npm warn peer ai@"^5.0.0" from @openrouter/ai-sdk-provider-v5@1.2.3
 
 ---
 
+## フェーズ2: データベースセットアップ
+
+### 計画との相違点
+
+#### 1. Prisma 7の設定方法の変更
+**計画（TODO.md）:**
+```prisma
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+```
+
+**実際の実装:**
+```prisma
+datasource db {
+  provider = "mongodb"
+}
+```
+
+**理由:**
+- Prisma 7では、datasourceの`url`属性がschema.prismaファイルでサポートされなくなった
+- 接続URLは`prisma.config.ts`で管理するように変更された
+- PrismaClientコンストラクタに`adapter`または`accelerateUrl`を渡す必要がある
+- この変更により、環境ごとの設定管理が柔軟になった
+
+#### 2. Prisma Client出力先の変更
+**初期設定:**
+```prisma
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+```
+
+**実際の実装:**
+```prisma
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
+}
+```
+
+**理由:**
+- `prisma-client-js`が正しいプロバイダー名
+- 標準的な出力先（node_modules/.prisma/client）を使用することで、importが簡単になる
+- カスタム出力先は特別な要件がない限り不要
+
+### 未完了タスク（ユーザー操作が必要）
+
+#### MongoDB Atlas設定
+以下のタスクは、ユーザーが手動で行う必要があります：
+
+1. **MongoDB Atlasアカウント作成**
+   - https://www.mongodb.com/cloud/atlas にアクセス
+   - 無料アカウントを作成
+
+2. **クラスタの作成**
+   - Free Tierクラスタを選択
+   - リージョンを選択（推奨: asia-northeast1またはasia-southeast1）
+
+3. **データベースユーザーの作成**
+   - Database Access画面でユーザーを作成
+   - ユーザー名とパスワードを記録
+
+4. **ネットワークアクセスの設定**
+   - Network Access画面でIPホワイトリストを設定
+   - 開発環境: `0.0.0.0/0`（全てのIPを許可）
+   - 本番環境: 特定のIPアドレスのみを許可
+
+5. **接続文字列の取得**
+   - Database画面で"Connect"をクリック
+   - "Connect your application"を選択
+   - 接続文字列をコピー
+   - `.env.local`の`DATABASE_URL`に設定
+
+**接続文字列の形式:**
+```
+mongodb+srv://<username>:<password>@<cluster-url>/<database-name>?retryWrites=true&w=majority
+```
+
+#### データベース接続の確認
+MongoDB Atlas設定完了後、以下のコマンドでデータベース接続を確認：
+```bash
+npx prisma db push
+```
+
+### データモデルについて
+- 将来的な拡張用に`Conversation`および`Message`モデルを定義
+- 現時点（フェーズ1-3）では会話履歴を保存しないため、これらのモデルは使用しない
+- フェーズ4以降で会話履歴の永続化機能を実装する際に使用予定
+
+---
+
 **最終更新:** 2025-12-19
-**フェーズ1完了時点**
+**フェーズ2完了時点**

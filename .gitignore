@@ -45,3 +45,5 @@ prisma/migrations/
 *.swp
 *.swo
 *~
+
+/app/generated/prisma

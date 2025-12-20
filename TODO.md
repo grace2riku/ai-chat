@@ -53,18 +53,19 @@
 - [ ] 接続文字列の取得
 
 ### 2.2 Prisma設定
-- [ ] Prismaの初期化
+- [x] Prismaの初期化
   ```bash
-  npx prisma init
+  npx prisma init --datasource-provider mongodb
   ```
-- [ ] `prisma/schema.prisma`の設定
+- [x] `prisma/schema.prisma`の設定
   - MongoDBプロバイダーの設定
   - データモデルの定義（将来的な拡張用）
-- [ ] Prismaクライアントの生成
+  - Conversation および Message モデルを定義
+- [x] Prismaクライアントの生成
   ```bash
   npx prisma generate
   ```
-- [ ] データベース接続の確認
+- [ ] データベース接続の確認（MongoDB接続文字列設定後に実行）
   ```bash
   npx prisma db push
   ```
