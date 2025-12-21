@@ -23,8 +23,8 @@ export default function MessageInput({ onSendMessage, isLoading }: MessageInputP
   };
 
   return (
-    <div className="border-t border-border bg-surface p-4">
-      <div className="flex gap-2 max-w-4xl mx-auto">
+    <div className="border-t border-border bg-surface p-4 shadow-md">
+      <div className="flex gap-3 max-w-4xl mx-auto">
         <textarea
           value={input}
           onChange={(e) => setInput(e.target.value)}
@@ -32,14 +32,32 @@ export default function MessageInput({ onSendMessage, isLoading }: MessageInputP
           placeholder="メッセージを入力..."
           disabled={isLoading}
           rows={1}
-          className="flex-1 resize-none rounded-lg border border-border px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex-1 resize-none rounded-lg border border-border px-4 py-3
+                     bg-white
+                     transition-all duration-300
+                     hover:border-border-hover hover:shadow-sm
+                     focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent focus:shadow-md
+                     disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-surface"
         />
         <button
           onClick={handleSend}
           disabled={!input.trim() || isLoading}
-          className="px-6 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="px-6 py-3 bg-primary text-white rounded-lg font-medium
+                     shadow-sm
+                     transition-all duration-300
+                     hover:bg-primary-700 hover:shadow-md hover:scale-105
+                     active:scale-95
+                     focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2
+                     disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
         >
-          {isLoading ? '送信中...' : '送信'}
+          {isLoading ? (
+            <span className="flex items-center gap-2">
+              <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+              送信中...
+            </span>
+          ) : (
+            '送信'
+          )}
         </button>
       </div>
     </div>
