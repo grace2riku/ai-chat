@@ -452,5 +452,93 @@ We detected multiple lockfiles and selected the directory of /Users/k-abe/packag
 
 ---
 
+## Claude APIモデルの更新
+
+### 計画との相違点
+
+#### 1. Claude 3.5 Sonnetモデルの廃止
+**計画（TODO.md / 初期実装）:**
+```typescript
+model: 'anthropic/claude-3-5-sonnet-20241022'
+```
+
+**実際の実装:**
+```typescript
+model: 'anthropic/claude-sonnet-4-5'
+```
+
+**理由:**
+- Claude 3.5 Sonnetモデル（`claude-3-5-sonnet-20240620`、`claude-3-5-sonnet-20241022`）は2025年7月21日に廃止された
+- API呼び出し時に404エラー（model not found）が発生
+- 現在利用可能なのはClaude 4.xファミリーのみ
+
+### エラーと対応
+
+#### 発生したエラー
+```
+Error [AI_APICallError]: model: claude-3-5-sonnet-20241022
+statusCode: 404
+error: {"type":"not_found_error","message":"model: claude-3-5-sonnet-20241022"}
+```
+
+#### 試行錯誤
+1. **最初の試み:** `claude-3-5-sonnet-20240620`（古い安定版）
+   - 結果: 404エラー（このモデルも廃止済み）
+
+2. **最終的な解決策:** `claude-sonnet-4-5`（最新モデル）
+   - 結果: 正常に動作 ✓
+
+### 現在利用可能なClaudeモデル（2025年12月時点）
+
+#### Claude 4.xファミリー
+- **Claude Sonnet 4.5** (`claude-sonnet-4-5`) - 最も強力なモデル
+- **Claude Opus 4.5** - エンタープライズワークフロー向け
+- **Claude Haiku 4.5** - 低レイテンシ・低コスト向け
+- **Claude Opus 4.1** - エージェントタスク向け
+- **Claude Sonnet 4** - 標準モデル
+
+#### 廃止されたモデル
+- Claude 3 Sonnet (2024-02-29) - 2025年7月21日に廃止
+- Claude 2.1 - 2025年7月21日に廃止
+- Claude 3.5 Sonnet (全バージョン) - 廃止
+
+### チャット機能のテスト結果
+
+#### テストメッセージ
+```json
+{
+  "message": "こんにちは！",
+  "conversationHistory": []
+}
+```
+
+#### AIレスポンス
+```json
+{
+  "response": "こんにちは！😊\n\n今日はどんな感じですか？何か面白いことありました？\n\nそれとも、何か話したいことや聞きたいことがあれば、気軽に言ってくださいね！",
+  "timestamp": "2025-12-21T05:51:54.007Z"
+}
+```
+
+#### 確認事項
+- ✅ API認証成功
+- ✅ モデル応答正常
+- ✅ カジュアルなトーン維持
+- ✅ 日本語対応
+- ✅ レスポンス時間: 約3秒
+- ✅ エラーハンドリング正常
+
+### 料金について
+
+Claude Sonnet 4.5の料金：
+- 入力: $3.00 / 100万トークン
+- 出力: $15.00 / 100万トークン
+
+**想定コスト:**
+- 短い会話（往復5回）: 約$0.01〜0.05
+- 100往復の会話: 約$1〜2
+
+---
+
 **最終更新:** 2025-12-21
-**開発サーバー起動確認完了**
+**チャット機能テスト完了**

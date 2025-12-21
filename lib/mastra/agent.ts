@@ -27,7 +27,7 @@ export const chatAgent = new Agent({
 - 専門的すぎる表現は避ける
 - 堅苦しい言葉遣いは避ける
 - リラックスした雰囲気を保つ`,
-  model: 'anthropic/claude-3-5-sonnet-20241022',
+  model: 'anthropic/claude-sonnet-4-5',
 });
 
 /**
