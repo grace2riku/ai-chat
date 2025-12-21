@@ -7,6 +7,7 @@ interface MessageInputProps {
 
 function MessageInput({ onSendMessage, isLoading }: MessageInputProps) {
   const [input, setInput] = useState('');
+  const [isComposing, setIsComposing] = useState(false);
 
   const handleSend = useCallback(() => {
     if (input.trim() && !isLoading) {
@@ -16,11 +17,22 @@ function MessageInput({ onSendMessage, isLoading }: MessageInputProps) {
   }, [input, isLoading, onSendMessage]);
 
   const handleKeyDown = useCallback((e: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    // IME変換中はEnterキーでの送信を無効化
+    if (e.key === 'Enter' && !e.shiftKey && !isComposing) {
       e.preventDefault();
       handleSend();
     }
-  }, [handleSend]);
+  }, [handleSend, isComposing]);
+
+  // IME入力開始
+  const handleCompositionStart = useCallback(() => {
+    setIsComposing(true);
+  }, []);
+
+  // IME入力終了
+  const handleCompositionEnd = useCallback(() => {
+    setIsComposing(false);
+  }, []);
 
   return (
     <div className="border-t border-border bg-surface p-4 shadow-md" role="complementary">
@@ -37,6 +49,8 @@ function MessageInput({ onSendMessage, isLoading }: MessageInputProps) {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
+          onCompositionStart={handleCompositionStart}
+          onCompositionEnd={handleCompositionEnd}
           placeholder="メッセージを入力..."
           disabled={isLoading}
           rows={1}
