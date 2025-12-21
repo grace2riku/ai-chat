@@ -361,5 +361,96 @@ MessageList → Message コンポーネント
 
 ---
 
-**最終更新:** 2025-12-19
-**フェーズ4完了時点**
+## 開発サーバーの起動と動作確認
+
+### 計画との相違点
+
+#### 1. Tailwind CSS PostCSS プラグインの変更
+**エラー:**
+```
+Module build failed (from ./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js):
+Error: It looks like you're trying to use `tailwindcss` directly as a PostCSS plugin.
+The PostCSS plugin has moved to a separate package, so to continue using Tailwind CSS with PostCSS
+you'll need to install `@tailwindcss/postcss` and update your PostCSS configuration.
+```
+
+**原因:**
+- Tailwind CSS v4では、PostCSS プラグインが別パッケージに分離された
+- `postcss.config.mjs`で`tailwindcss`を直接使用できなくなった
+
+**修正:**
+1. 新しいパッケージのインストール
+   ```bash
+   npm install -D @tailwindcss/postcss
+   ```
+
+2. `postcss.config.mjs`の更新
+   ```javascript
+   // 変更前
+   plugins: {
+     tailwindcss: {},
+   }
+
+   // 変更後
+   plugins: {
+     '@tailwindcss/postcss': {},
+   }
+   ```
+
+### 動作確認結果
+
+#### アプリケーション起動
+- **開発サーバー:** http://localhost:3000
+- **ビルド時間:** 12.7秒（597モジュール）
+- **ステータス:** 正常起動 ✓
+
+#### UI確認
+以下の要素が正常に表示されることを確認：
+1. **ヘッダー**
+   - タイトル: "AI Chat"
+   - 説明文: "カジュアルなAIチャットボット"
+
+2. **空状態表示**
+   - アイコン: 💬
+   - 見出し: "チャットを始めましょう"
+   - 説明: "メッセージを入力して、AIとの会話を楽しんでください"
+
+3. **入力フォーム**
+   - テキストエリア（プレースホルダー: "メッセージを入力..."）
+   - 送信ボタン（テキスト: "送信"）
+
+4. **スタイリング**
+   - Tailwind CSSクラスが正常に適用
+   - レスポンシブレイアウト
+   - 適切なカラースキーム
+
+#### API確認
+- **エンドポイント:** GET /api/chat
+- **レスポンス:** `{"status":"ok","message":"Chat API is running"}`
+- **ステータスコード:** 200 OK
+
+### 注意事項
+
+#### ANTHROPIC_API_KEY未設定
+- `.env.local`にAPIキーが設定されていない
+- UIは正常に動作するが、実際のチャット機能は使用不可
+- テストするには以下を設定：
+  ```bash
+  ANTHROPIC_API_KEY=sk-ant-...
+  ```
+
+#### 警告メッセージ
+開発サーバー起動時に以下の警告が表示されるが、動作には影響なし：
+```
+Warning: Next.js inferred your workspace root, but it may not be correct.
+We detected multiple lockfiles and selected the directory of /Users/k-abe/package-lock.json as the root directory.
+```
+
+**対応:**
+- 必要に応じて`next.config.ts`に`outputFileTracingRoot`を設定可能
+- 不要なlockfileを削除することも検討
+
+---
+
+**最終更新:** 2025-12-21
+**開発サーバー起動確認完了**
