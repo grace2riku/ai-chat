@@ -1,10 +1,11 @@
+import { memo } from 'react';
 import type { Message as MessageType } from '@/types/chat';
 
 interface MessageProps {
   message: MessageType;
 }
 
-export default function Message({ message }: MessageProps) {
+function Message({ message }: MessageProps) {
   const isUser = message.role === 'user';
 
   return (
@@ -12,6 +13,8 @@ export default function Message({ message }: MessageProps) {
       className={`flex w-full mb-4 animate-slide-up ${
         isUser ? 'justify-end' : 'justify-start'
       }`}
+      role="article"
+      aria-label={isUser ? 'あなたのメッセージ' : 'AIの応答'}
     >
       <div
         className={`max-w-[70%] rounded-lg px-4 py-3 shadow-sm transition-all duration-300 hover:shadow-md ${
@@ -27,3 +30,6 @@ export default function Message({ message }: MessageProps) {
     </div>
   );
 }
+
+// メモ化により、propsが変更されない限り再レンダリングを防ぐ
+export default memo(Message);

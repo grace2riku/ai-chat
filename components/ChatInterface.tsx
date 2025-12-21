@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import MessageList from './MessageList';
 import MessageInput from './MessageInput';
 import type { Message, ChatRequest, ChatResponse, ChatError } from '@/types/chat';
@@ -10,7 +10,7 @@ export default function ChatInterface() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSendMessage = async (message: string) => {
+  const handleSendMessage = useCallback(async (message: string) => {
     // ユーザーメッセージを追加
     const userMessage: Message = {
       role: 'user',
@@ -64,12 +64,12 @@ export default function ChatInterface() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [messages]);
 
   return (
     <div className="flex flex-col h-screen bg-background">
       {/* ヘッダー */}
-      <header className="bg-white border-b border-border px-4 py-4 shadow-sm animate-slide-down">
+      <header className="bg-white border-b border-border px-4 py-4 shadow-sm animate-slide-down" role="banner">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-2xl font-bold text-text-primary bg-gradient-to-r from-primary-600 to-primary-400 bg-clip-text text-transparent">
             AI Chat
@@ -82,12 +82,17 @@ export default function ChatInterface() {
 
       {/* エラー表示 */}
       {error && (
-        <div className="bg-red-50 border-l-4 border-error p-4 mx-4 mt-4 rounded-r-lg shadow-sm animate-slide-down">
+        <div
+          className="bg-red-50 border-l-4 border-error p-4 mx-4 mt-4 rounded-r-lg shadow-sm animate-slide-down"
+          role="alert"
+          aria-live="assertive"
+        >
           <div className="flex items-start gap-3">
             <svg
               className="w-5 h-5 text-error flex-shrink-0 mt-0.5"
               fill="currentColor"
               viewBox="0 0 20 20"
+              aria-hidden="true"
             >
               <path
                 fillRule="evenodd"
@@ -101,7 +106,9 @@ export default function ChatInterface() {
       )}
 
       {/* メッセージリスト */}
-      <MessageList messages={messages} />
+      <main className="flex-1 overflow-hidden" role="main">
+        <MessageList messages={messages} isLoading={isLoading} />
+      </main>
 
       {/* 入力フォーム */}
       <MessageInput onSendMessage={handleSendMessage} isLoading={isLoading} />
