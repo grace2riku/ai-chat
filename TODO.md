@@ -208,30 +208,41 @@
 ## フェーズ7: テスト
 
 ### 7.1 テスト環境のセットアップ
-- [ ] Jest + React Testing Libraryのインストール
+- [x] Jest + React Testing Libraryのインストール
   ```bash
-  npm install -D jest @testing-library/react @testing-library/jest-dom jest-environment-jsdom
+  npm install -D jest @testing-library/react @testing-library/jest-dom jest-environment-jsdom @testing-library/user-event ts-node
   ```
-- [ ] `jest.config.js`の設定
-- [ ] `jest.setup.js`の作成
+- [x] `jest.config.ts`の設定
+- [x] `jest.setup.ts`の作成
+- [x] package.jsonにテストスクリプトを追加
 
 ### 7.2 単体テスト
-- [ ] コンポーネントテスト
-  - Message.tsx
-  - MessageInput.tsx
-  - MessageList.tsx
-- [ ] ユーティリティ関数テスト
+- [x] コンポーネントテスト
+  - Message.tsx (7テスト: 役割別表示、CSS適用、フォーマット、メモ化、アクセシビリティ)
+  - MessageInput.tsx (18テスト: 入力処理、ボタン状態、ローディング、フォーム送信、キーボードショートカット、IME対応、アクセシビリティ)
+  - MessageList.tsx (18テスト: 空状態、メッセージ表示、ローディング、自動スクロール、アクセシビリティ、メッセージ順序、エッジケース)
+- [x] ユーティリティ関数テスト（該当なし）
 
 ### 7.3 APIテスト
-- [ ] `/api/chat`エンドポイントのテスト
-  - 正常系テスト
-  - 異常系テスト（バリデーションエラー、API エラー）
+- [x] `/api/chat`エンドポイントのテスト（30テスト）
+  - GET エンドポイント
+  - POST リクエストバリデーション（正常系・異常系）
+  - 入力サニタイゼーション
+  - レート制限
+  - 会話履歴処理
+  - レスポンス形式
+  - エラーハンドリング
 
 ### 7.4 E2Eテスト（オプション）
 - [ ] Playwrightのセットアップ
 - [ ] 主要フローのE2Eテスト
   - メッセージ送信フロー
   - エラーハンドリング
+
+**テスト結果**:
+- テストスイート: 4 passed, 4 total
+- テスト: 73 passed, 73 total
+- カバレッジ: components, app/api/chat
 
 ---
 
