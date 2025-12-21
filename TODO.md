@@ -75,37 +75,37 @@
 ## フェーズ3: バックエンド実装
 
 ### 3.1 Mastra設定
-- [ ] `lib/mastra/`ディレクトリの作成
-- [ ] `lib/mastra/agent.ts`の実装
+- [x] `lib/mastra/`ディレクトリの作成
+- [x] `lib/mastra/agent.ts`の実装
   - Mastraインスタンスの作成
-  - Anthropicプロバイダーの設定
+  - Anthropicプロバイダーの設定（anthropic/claude-3-5-sonnet-20241022）
   - システムプロンプトの設定（カジュアルなトーン）
   - Claude モデルの指定
 
 ### 3.2 Claude APIクライアント
-- [ ] `lib/claude/`ディレクトリの作成
-- [ ] `lib/claude/client.ts`の実装
-  - APIクライアントの初期化
-  - エラーハンドリング
-  - レート制限の実装
+- [x] `lib/claude/`ディレクトリの作成（スキップ - Mastraが内部処理）
+- [x] `lib/claude/client.ts`の実装（スキップ - Mastraが内部処理）
+  - Mastraを使用するため、別途Claude APIクライアントは不要
+  - エラーハンドリングとレート制限はAPIエンドポイントで実装
 
 ### 3.3 型定義
-- [ ] `types/`ディレクトリの作成
-- [ ] `types/chat.ts`の作成
+- [x] `types/`ディレクトリの作成
+- [x] `types/chat.ts`の作成
   - Message型の定義
   - ChatRequest型の定義
   - ChatResponse型の定義
+  - ChatError型の定義
 
 ### 3.4 APIエンドポイント実装
-- [ ] `app/api/chat/route.ts`の作成
-- [ ] POST /api/chat エンドポイントの実装
+- [x] `app/api/chat/route.ts`の作成
+- [x] POST /api/chat エンドポイントの実装
   - リクエストバリデーション
   - 会話履歴の処理
   - Mastraを使用したAI応答生成
   - レスポンスの返却
   - エラーハンドリング
-- [ ] レート制限の実装
-- [ ] 入力サニタイゼーション
+- [x] レート制限の実装（メモリベース、1分あたり10リクエスト）
+- [x] 入力サニタイゼーション（最大2000文字）
 
 ---
 
