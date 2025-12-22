@@ -249,34 +249,34 @@
 ## フェーズ8: デプロイ準備
 
 ### 8.1 Next.js設定
-- [ ] `next.config.js`の最適化
+- [x] `next.config.js`の最適化
   - 本番環境設定
   - 画像最適化設定
   - 出力設定（standalone mode）
 
 ### 8.2 Dockerファイル作成
-- [ ] `Dockerfile`の作成
+- [x] `Dockerfile`の作成
   - マルチステージビルド
   - 最適化されたイメージサイズ
   - ポート8080の公開
-- [ ] `.dockerignore`の作成
+- [x] `.dockerignore`の作成
 
 ### 8.3 Cloud Build設定
-- [ ] `cloudbuild.yaml`の作成
+- [x] `cloudbuild.yaml`の作成
   - ビルドステップの定義
   - Cloud Runデプロイ設定
   - 環境変数の設定
 
 ### 8.4 ローカルでのDocker確認
-- [ ] Dockerイメージのビルド
+- [x] Dockerイメージのビルド
   ```bash
   docker build -t ai-chat .
   ```
-- [ ] Dockerコンテナの実行
+- [x] Dockerコンテナの実行
   ```bash
   docker run -p 8080:8080 --env-file .env.local ai-chat
   ```
-- [ ] 動作確認
+- [x] 動作確認
 
 ---
 

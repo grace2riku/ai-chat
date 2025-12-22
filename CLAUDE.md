@@ -360,6 +360,78 @@ npm run dev
 http://localhost:3000
 ```
 
+### Makefileコマンド
+
+プロジェクトには便利なMakefileコマンドが用意されています。
+
+#### 基本コマンド
+
+```bash
+# プロジェクトの初期化（依存関係のインストール + Prismaセットアップ）
+make init
+
+# 開発サーバーを起動
+make dev
+
+# 本番用ビルド
+make build
+
+# テストを実行
+make test
+
+# テストをwatchモードで実行
+make test-watch
+```
+
+#### デプロイコマンド
+
+```bash
+# Google Cloud Runにデプロイ
+PROJECT_ID=your-project-id make deploy
+
+# Dockerイメージをビルド
+make docker-build
+
+# Dockerコンテナを起動（.env.localが必要）
+make docker-run
+```
+
+#### ユーティリティコマンド
+
+```bash
+# ビルド成果物を削除
+make clean
+
+# Prismaクライアントを生成
+make prisma-generate
+
+# Prismaスキーマをデータベースに反映
+make prisma-push
+
+# 使用可能なコマンド一覧を表示
+make help
+```
+
+#### クイックスタート（Makefile使用）
+
+Makefileを使用すると、セットアップが簡単になります：
+
+```bash
+# 1. リポジトリクローン
+git clone <repository-url>
+cd ai-chat
+
+# 2. .env.localファイルを作成して環境変数を設定
+cp .env.example .env.local
+# .env.localを編集してAPIキーを設定
+
+# 3. プロジェクトを初期化
+make init
+
+# 4. 開発サーバーを起動
+make dev
+```
+
 ### 推奨VSCode拡張機能
 - ESLint
 - Prettier
@@ -393,10 +465,13 @@ ai-chat/
 ├── .env.local                     # Environment variables (gitignored)
 ├── .gitignore
 ├── Dockerfile                     # Docker configuration
+├── .dockerignore                  # Docker ignore file
 ├── cloudbuild.yaml               # Cloud Build configuration
+├── Makefile                       # Common commands
 ├── next.config.js                # Next.js configuration
 ├── package.json
 ├── tsconfig.json
+├── DEPLOYMENT.md                  # Deployment guide
 └── README.md
 ```
 
@@ -510,6 +585,6 @@ ai-chat/
 
 ---
 
-**ドキュメントバージョン**: 1.1
-**最終更新日**: 2025-12-21
+**ドキュメントバージョン**: 1.2
+**最終更新日**: 2025-12-22
 **作成者**: Claude & User

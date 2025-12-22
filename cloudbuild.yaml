@@ -1,0 +1,65 @@
+steps:
+  # Step 1: Build Docker image
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/ai-chat:$COMMIT_SHA'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/ai-chat:latest'
+      - '.'
+    id: 'build-image'
+
+  # Step 2: Push Docker image to Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'gcr.io/$PROJECT_ID/ai-chat:$COMMIT_SHA'
+    id: 'push-image-sha'
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'gcr.io/$PROJECT_ID/ai-chat:latest'
+    id: 'push-image-latest'
+
+  # Step 3: Deploy to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'ai-chat'
+      - '--image'
+      - 'gcr.io/$PROJECT_ID/ai-chat:$COMMIT_SHA'
+      - '--region'
+      - 'asia-northeast1'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+      - '--memory'
+      - '1Gi'
+      - '--cpu'
+      - '1'
+      - '--max-instances'
+      - '10'
+      - '--min-instances'
+      - '0'
+      - '--timeout'
+      - '60'
+      - '--set-secrets'
+      - 'ANTHROPIC_API_KEY=anthropic-api-key:latest,DATABASE_URL=database-url:latest'
+    id: 'deploy-to-cloud-run'
+
+# Images to be pushed to Container Registry
+images:
+  - 'gcr.io/$PROJECT_ID/ai-chat:$COMMIT_SHA'
+  - 'gcr.io/$PROJECT_ID/ai-chat:latest'
+
+# Build timeout (default is 10 minutes)
+timeout: '1200s'
+
+# Options for the build
+options:
+  machineType: 'N1_HIGHCPU_8'
+  logging: CLOUD_LOGGING_ONLY
