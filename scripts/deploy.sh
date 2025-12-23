@@ -12,10 +12,20 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# プロジェクトIDの設定
-PROJECT_ID="ai-chat-482021"
-REGION="asia-northeast1"
-SERVICE_NAME="ai-chat"
+# プロジェクトIDとリージョンの設定
+# 環境変数 > gcloud設定 > デフォルト値の優先順位で設定
+PROJECT_ID="${GCP_PROJECT_ID:-$(gcloud config get-value project 2>/dev/null)}"
+REGION="${GCP_REGION:-asia-northeast1}"
+SERVICE_NAME="${SERVICE_NAME:-ai-chat}"
+
+# プロジェクトIDが設定されていない場合はエラー
+if [ -z "$PROJECT_ID" ] || [ "$PROJECT_ID" = "(unset)" ]; then
+  echo -e "${RED}エラー: プロジェクトIDが設定されていません${NC}"
+  echo "以下のいずれかの方法で設定してください:"
+  echo "  1. 環境変数: export GCP_PROJECT_ID=your-project-id"
+  echo "  2. gcloud設定: gcloud config set project your-project-id"
+  exit 1
+fi
 
 echo -e "${BLUE}=== AI Chat デプロイ ===${NC}"
 echo "プロジェクトID: $PROJECT_ID"
@@ -73,7 +83,7 @@ elif [ "$DEPLOY_METHOD" = "2" ]; then
     --max-instances 10 \
     --min-instances 0 \
     --timeout 60 \
-    --set-secrets ANTHROPIC_API_KEY=anthropic-api-key:latest,DATABASE_URL=database-url:latest
+    --set-secrets ANTHROPIC_API_KEY=anthropic-api-key:latest
 
   echo ""
   echo -e "${GREEN}✓ デプロイが完了しました！${NC}"
