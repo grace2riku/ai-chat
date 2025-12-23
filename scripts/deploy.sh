@@ -52,7 +52,11 @@ if [ "$DEPLOY_METHOD" = "1" ]; then
   echo -e "${YELLOW}Cloud Build を使用してデプロイします...${NC}"
   echo ""
 
-  gcloud builds submit --config cloudbuild.yaml
+  # Gitコミットハッシュを取得
+  COMMIT_SHA=$(git rev-parse --short HEAD 2>/dev/null || echo "latest")
+  echo "コミットSHA: $COMMIT_SHA"
+
+  gcloud builds submit --config cloudbuild.yaml --substitutions=COMMIT_SHA=$COMMIT_SHA
 
   echo ""
   echo -e "${GREEN}✓ デプロイが完了しました！${NC}"
