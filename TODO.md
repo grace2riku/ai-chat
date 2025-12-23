@@ -283,13 +283,13 @@
 ## フェーズ9: Google Cloud デプロイ
 
 ### 9.1 GCP設定
-- [ ] Google Cloud Platformプロジェクトの作成
-- [ ] 必要なAPIの有効化
+- [x] Google Cloud Platformプロジェクトの作成
+- [x] 必要なAPIの有効化
   - Cloud Run API
   - Cloud Build API
   - Container Registry API
   - Secret Manager API
-- [ ] gcloud CLIのインストールと設定
+- [x] gcloud CLIのインストールと設定
   ```bash
   gcloud init
   gcloud auth login
@@ -297,27 +297,27 @@
   ```
 
 ### 9.2 Secret Manager設定
-- [ ] シークレットの作成
+- [x] シークレットの作成
   ```bash
   echo -n "YOUR_ANTHROPIC_API_KEY" | gcloud secrets create anthropic-api-key --data-file=-
   echo -n "YOUR_DATABASE_URL" | gcloud secrets create database-url --data-file=-
   ```
-- [ ] Cloud Runサービスアカウントへの権限付与
+- [x] Cloud Runサービスアカウントへの権限付与
 
 ### 9.3 初回デプロイ
 - [ ] Cloud Buildトリガーの設定（オプション）
-- [ ] 手動デプロイの実行
+- [x] 手動デプロイの実行
   ```bash
   gcloud builds submit --config cloudbuild.yaml
   ```
-- [ ] Cloud Run設定の確認
+- [x] Cloud Run設定の確認
   - リージョン: asia-northeast1
   - 認証: 未認証のアクセスを許可
   - メモリ: 512MB〜1GB
   - CPU: 1
 
 ### 9.4 環境変数とシークレット設定
-- [ ] Cloud Runサービスに環境変数を設定
+- [x] Cloud Runサービスに環境変数を設定
   ```bash
   gcloud run services update ai-chat \
     --update-secrets=ANTHROPIC_API_KEY=anthropic-api-key:latest \
@@ -326,12 +326,12 @@
   ```
 
 ### 9.5 デプロイ確認
-- [ ] デプロイされたURLへアクセス
-- [ ] 機能テスト
+- [x] デプロイされたURLへアクセス
+- [x] 機能テスト
   - メッセージ送信
   - AI応答確認
   - エラーハンドリング確認
-- [ ] ログの確認
+- [x] ログの確認
   ```bash
   gcloud run services logs read ai-chat --region=asia-northeast1
   ```

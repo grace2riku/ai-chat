@@ -86,7 +86,47 @@ docker rmi ai-chat
 
 - Google Cloud Platform (GCP) アカウント
 - gcloud CLI がインストールされていること
-- GCPプロジェクトが作成されていること
+- GCPプロジェクトが作成されていること（プロジェクトID: `ai-chat-482021`）
+
+### クイックスタート（推奨）
+
+最も簡単な方法は、用意されたスクリプトとMakefileコマンドを使用することです。
+
+#### 1. Google Cloud の初期設定
+
+```bash
+# Makefileを使用
+make setup-gcp
+
+# または、スクリプトを直接実行
+./scripts/setup-gcp.sh
+```
+
+このコマンドは以下を自動的に実行します：
+- gcloud CLIの設定（プロジェクトID、リージョン）
+- 必要なAPIの有効化（Cloud Run, Cloud Build, Container Registry, Secret Manager）
+- Secret Managerでシークレットの作成（対話的に入力）
+- IAM権限の設定
+
+#### 2. アプリケーションのデプロイ
+
+```bash
+# Makefileを使用
+make deploy
+
+# または、スクリプトを直接実行
+./scripts/deploy.sh
+```
+
+デプロイ方法を選択できます：
+1. **Cloud Build を使用**（推奨）：自動的にビルドとデプロイを実行
+2. **ローカルビルド + デプロイ**：ローカルでDockerイメージをビルドしてからデプロイ
+
+---
+
+### 詳細な手順（手動設定）
+
+上記のスクリプトを使用せず、手動で設定する場合は以下の手順に従ってください。
 
 ### 1. gcloud CLIの初期設定
 

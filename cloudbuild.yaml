@@ -48,7 +48,7 @@ steps:
       - '--timeout'
       - '60'
       - '--set-secrets'
-      - 'ANTHROPIC_API_KEY=anthropic-api-key:latest,DATABASE_URL=database-url:latest'
+      - 'ANTHROPIC_API_KEY=anthropic-api-key:latest'
     id: 'deploy-to-cloud-run'
 
 # Images to be pushed to Container Registry

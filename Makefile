@@ -1,4 +1,4 @@
-.PHONY: help init dev build test deploy docker-build docker-run clean
+.PHONY: help init dev build test deploy setup-gcp docker-build docker-run clean
 
 # デフォルトのターゲット（helpを表示）
 help:
@@ -8,6 +8,7 @@ help:
 	@echo "  make build         - 本番用ビルド"
 	@echo "  make test          - テストを実行"
 	@echo "  make test-watch    - テストをwatchモードで実行"
+	@echo "  make setup-gcp     - Google Cloudの初期設定"
 	@echo "  make deploy        - Google Cloud Runにデプロイ"
 	@echo "  make docker-build  - Dockerイメージをビルド"
 	@echo "  make docker-run    - Dockerコンテナを起動"
@@ -48,17 +49,15 @@ test-watch:
 	@echo "🧪 テストをwatchモードで実行中..."
 	npm run test:watch
 
+# Google Cloudの初期設定
+setup-gcp:
+	@echo "☁️  Google Cloudの初期設定を開始..."
+	./scripts/setup-gcp.sh
+
 # Google Cloud Runにデプロイ
 deploy:
 	@echo "☁️  Google Cloud Runにデプロイ中..."
-	@echo "プロジェクトID: $${PROJECT_ID}"
-	@if [ -z "$${PROJECT_ID}" ]; then \
-		echo "❌ エラー: PROJECT_ID環境変数が設定されていません"; \
-		echo "実行例: PROJECT_ID=your-project-id make deploy"; \
-		exit 1; \
-	fi
-	gcloud builds submit --config cloudbuild.yaml
-	@echo "✅ デプロイが完了しました！"
+	./scripts/deploy.sh
 
 # Dockerイメージをビルド
 docker-build:
