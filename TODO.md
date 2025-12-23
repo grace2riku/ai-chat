@@ -341,15 +341,21 @@
 ## フェーズ10: CI/CD設定（オプション）
 
 ### 10.1 GitHub Actions設定
-- [ ] `.github/workflows/`ディレクトリの作成
-- [ ] `deploy.yml`の作成
+- [x] `.github/workflows/`ディレクトリの作成
+- [x] `deploy.yml`の作成
   - mainブランチへのpush時にデプロイ
   - テスト実行
   - ビルド
   - Cloud Runへのデプロイ
+- [x] `test.yml`の作成
+  - Pull Request時にテスト実行
+- [x] セットアップガイド（SETUP.md）の作成
 
 ### 10.2 デプロイワークフロー
-- [ ] GCP認証情報の設定（GitHub Secrets）
+- [x] GCP認証情報の設定手順書を作成
+  - Workload Identity Federationの設定
+  - GitHub Secretsの設定
+- [ ] Workload Identity Federationの実際の設定（手動実行が必要）
 - [ ] ワークフローのテスト
 - [ ] 自動デプロイの確認
 
