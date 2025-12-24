@@ -1,5 +1,7 @@
 # AI チャットボット
 
+[![Deploy to Cloud Run](https://github.com/grace2riku/ai-chat/actions/workflows/deploy.yml/badge.svg)](https://github.com/grace2riku/ai-chat/actions/workflows/deploy.yml)
+
 Claude AIを使用したカジュアルな雑談ができるチャットボットアプリケーション。
 
 ## 特徴
