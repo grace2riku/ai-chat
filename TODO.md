@@ -355,9 +355,9 @@
 - [x] GCP認証情報の設定手順書を作成
   - Workload Identity Federationの設定
   - GitHub Secretsの設定
-- [ ] Workload Identity Federationの実際の設定（手動実行が必要）
-- [ ] ワークフローのテスト
-- [ ] 自動デプロイの確認
+- [x] Workload Identity Federationの実際の設定（手動実行が必要）
+- [x] ワークフローのテスト
+- [x] 自動デプロイの確認
 
 ---
 
