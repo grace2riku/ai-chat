@@ -1,20 +1,24 @@
 import { useState, KeyboardEvent, useCallback, memo } from 'react';
+import ImageUpload from './ImageUpload';
+import type { ImageUploadData } from '@/types/chat';
 
 interface MessageInputProps {
-  onSendMessage: (message: string) => void;
+  onSendMessage: (message: string, image?: ImageUploadData) => void;
   isLoading: boolean;
 }
 
 function MessageInput({ onSendMessage, isLoading }: MessageInputProps) {
   const [input, setInput] = useState('');
   const [isComposing, setIsComposing] = useState(false);
+  const [imageData, setImageData] = useState<ImageUploadData | null>(null);
 
   const handleSend = useCallback(() => {
     if (input.trim() && !isLoading) {
-      onSendMessage(input.trim());
+      onSendMessage(input.trim(), imageData || undefined);
       setInput('');
+      setImageData(null);
     }
-  }, [input, isLoading, onSendMessage]);
+  }, [input, isLoading, imageData, onSendMessage]);
 
   const handleKeyDown = useCallback((e: KeyboardEvent<HTMLTextAreaElement>) => {
     // IME変換中はEnterキーでの送信を無効化
@@ -38,56 +42,63 @@ function MessageInput({ onSendMessage, isLoading }: MessageInputProps) {
     <div className="border-t border-border bg-surface p-4 shadow-md" role="complementary">
       <form
         onSubmit={(e) => { e.preventDefault(); handleSend(); }}
-        className="flex gap-3 max-w-4xl mx-auto"
+        className="flex flex-col gap-3 max-w-4xl mx-auto"
         aria-label="メッセージ入力フォーム"
       >
-        <label htmlFor="message-input" className="sr-only">
-          メッセージを入力
-        </label>
-        <textarea
-          id="message-input"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={handleKeyDown}
-          onCompositionStart={handleCompositionStart}
-          onCompositionEnd={handleCompositionEnd}
-          placeholder="メッセージを入力..."
-          disabled={isLoading}
-          rows={1}
-          aria-label="メッセージ入力欄"
-          aria-describedby="message-input-help"
-          className="flex-1 resize-none rounded-lg border border-border px-4 py-3
-                     bg-white
-                     transition-all duration-300
-                     hover:border-border-hover hover:shadow-sm
-                     focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent focus:shadow-md
-                     disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-surface"
-        />
-        <span id="message-input-help" className="sr-only">
-          Shift + Enterで改行、Enterで送信
-        </span>
-        <button
-          type="submit"
-          onClick={handleSend}
-          disabled={!input.trim() || isLoading}
-          aria-label={isLoading ? 'メッセージ送信中' : 'メッセージを送信'}
-          className="px-6 py-3 bg-primary text-white rounded-lg font-medium
-                     shadow-sm
-                     transition-all duration-300
-                     hover:bg-primary-700 hover:shadow-md hover:scale-105
-                     active:scale-95
-                     focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2
-                     disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-        >
-          {isLoading ? (
-            <span className="flex items-center gap-2">
-              <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-              送信中...
-            </span>
-          ) : (
-            '送信'
-          )}
-        </button>
+        <div className="flex gap-3">
+          <ImageUpload
+            onImageSelect={setImageData}
+            currentImage={imageData}
+            disabled={isLoading}
+          />
+          <label htmlFor="message-input" className="sr-only">
+            メッセージを入力
+          </label>
+          <textarea
+            id="message-input"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            onCompositionStart={handleCompositionStart}
+            onCompositionEnd={handleCompositionEnd}
+            placeholder="メッセージを入力..."
+            disabled={isLoading}
+            rows={1}
+            aria-label="メッセージ入力欄"
+            aria-describedby="message-input-help"
+            className="flex-1 resize-none rounded-lg border border-border px-4 py-3
+                       bg-white
+                       transition-all duration-300
+                       hover:border-border-hover hover:shadow-sm
+                       focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent focus:shadow-md
+                       disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-surface"
+          />
+          <span id="message-input-help" className="sr-only">
+            Shift + Enterで改行、Enterで送信
+          </span>
+          <button
+            type="submit"
+            onClick={handleSend}
+            disabled={!input.trim() || isLoading}
+            aria-label={isLoading ? 'メッセージ送信中' : 'メッセージを送信'}
+            className="px-6 py-3 bg-primary text-white rounded-lg font-medium
+                       shadow-sm
+                       transition-all duration-300
+                       hover:bg-primary-700 hover:shadow-md hover:scale-105
+                       active:scale-95
+                       focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2
+                       disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+          >
+            {isLoading ? (
+              <span className="flex items-center gap-2">
+                <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                送信中...
+              </span>
+            ) : (
+              '送信'
+            )}
+          </button>
+        </div>
       </form>
     </div>
   );
