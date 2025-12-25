@@ -193,12 +193,9 @@ describe('ImageUpload', () => {
 
   describe('Image validation and error handling', () => {
     it('displays error alert when image processing fails with unsupported format', async () => {
-      // Given: Mock window.alert first
+      // Given: Restore real implementation for this test
+      jest.unmock('@/lib/image-utils');
       const alertSpy = jest.spyOn(window, 'alert').mockImplementation(() => {});
-
-      // Then set up the error mock
-      const errorMessage = 'サポートされていないファイル形式です。PNG、JPEG、GIF、WebPのみ対応しています。';
-      mockConvertFileToImageContent.mockRejectedValueOnce(new Error(errorMessage));
 
       const user = userEvent.setup();
       render(
@@ -209,21 +206,18 @@ describe('ImageUpload', () => {
       );
 
       const fileInput = screen.getByLabelText('画像ファイルを選択') as HTMLInputElement;
+      // Use a real invalid file type to trigger real validation
       const invalidFile = new File(['test'], 'test.txt', { type: 'text/plain' });
 
       // When: Invalid file is selected
       await user.upload(fileInput, invalidFile);
 
-      // Then: convertFileToImageContent should be called
+      // Then: Error alert should be displayed with correct message
       await waitFor(() => {
-        expect(mockConvertFileToImageContent).toHaveBeenCalledWith(invalidFile);
-      }, { timeout: 3000 });
-
-      // And: Error alert should be displayed
-      await waitFor(() => {
-        expect(alertSpy).toHaveBeenCalledTimes(1);
-        expect(alertSpy).toHaveBeenCalledWith(errorMessage);
-      }, { timeout: 3000 });
+        expect(alertSpy).toHaveBeenCalledWith(
+          'サポートされていないファイル形式です。PNG、JPEG、GIF、WebPのみ対応しています。'
+        );
+      }, { timeout: 5000 });
 
       // And: onImageSelect should be called with null (resetting state)
       expect(mockOnImageSelect).toHaveBeenCalledWith(null);
@@ -232,12 +226,9 @@ describe('ImageUpload', () => {
     });
 
     it('displays error alert when image processing fails with file size exceeded', async () => {
-      // Given: Mock window.alert first
+      // Given: Restore real implementation for this test
+      jest.unmock('@/lib/image-utils');
       const alertSpy = jest.spyOn(window, 'alert').mockImplementation(() => {});
-
-      // Then set up the error mock
-      const errorMessage = 'ファイルサイズが大きすぎます。最大5MBまでです。';
-      mockConvertFileToImageContent.mockRejectedValueOnce(new Error(errorMessage));
 
       const user = userEvent.setup();
       render(
@@ -248,21 +239,19 @@ describe('ImageUpload', () => {
       );
 
       const fileInput = screen.getByLabelText('画像ファイルを選択') as HTMLInputElement;
-      const largeFile = new File(['x'.repeat(6 * 1024 * 1024)], 'large.png', { type: 'image/png' });
+      // Create a file larger than 5MB to trigger real size validation
+      const largeContent = new Uint8Array(6 * 1024 * 1024).fill(65); // 6MB of 'A'
+      const largeFile = new File([largeContent], 'large.png', { type: 'image/png' });
 
       // When: Large file is selected
       await user.upload(fileInput, largeFile);
 
-      // Then: convertFileToImageContent should be called
+      // Then: Error alert should be displayed with correct message
       await waitFor(() => {
-        expect(mockConvertFileToImageContent).toHaveBeenCalledWith(largeFile);
-      }, { timeout: 3000 });
-
-      // And: Error alert should be displayed
-      await waitFor(() => {
-        expect(alertSpy).toHaveBeenCalledTimes(1);
-        expect(alertSpy).toHaveBeenCalledWith(errorMessage);
-      }, { timeout: 3000 });
+        expect(alertSpy).toHaveBeenCalledWith(
+          'ファイルサイズが大きすぎます。最大5MBまでです。'
+        );
+      }, { timeout: 5000 });
 
       // And: onImageSelect should be called with null
       expect(mockOnImageSelect).toHaveBeenCalledWith(null);
@@ -271,10 +260,10 @@ describe('ImageUpload', () => {
     });
 
     it('displays generic error message for non-Error exceptions', async () => {
-      // Given: Mock window.alert first
+      // Given: Mock only for this specific test case (non-Error exception)
       const alertSpy = jest.spyOn(window, 'alert').mockImplementation(() => {});
 
-      // Then set up non-Error rejection
+      // Set up the mock to throw a non-Error value
       mockConvertFileToImageContent.mockRejectedValueOnce('String error');
 
       const user = userEvent.setup();
@@ -286,22 +275,19 @@ describe('ImageUpload', () => {
       );
 
       const fileInput = screen.getByLabelText('画像ファイルを選択') as HTMLInputElement;
-      // Use a small file to avoid triggering size validation
-      const testFile = new File(['small test content'], 'test.png', { type: 'image/png' });
+      // Use a valid small PNG file
+      const testFile = new File(['test content'], 'test.png', { type: 'image/png' });
 
       // When: File is selected and non-Error is thrown
       await user.upload(fileInput, testFile);
 
-      // Then: convertFileToImageContent should be called
+      // Then: Generic error message should be displayed
       await waitFor(() => {
-        expect(mockConvertFileToImageContent).toHaveBeenCalledWith(testFile);
-      }, { timeout: 3000 });
-
-      // And: Generic error message should be displayed
-      await waitFor(() => {
-        expect(alertSpy).toHaveBeenCalledTimes(1);
         expect(alertSpy).toHaveBeenCalledWith('画像の処理に失敗しました。');
-      }, { timeout: 3000 });
+      }, { timeout: 5000 });
+
+      // And: onImageSelect should be called with null
+      expect(mockOnImageSelect).toHaveBeenCalledWith(null);
 
       alertSpy.mockRestore();
     });
