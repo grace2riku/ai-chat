@@ -3,19 +3,30 @@
 import { useState, useCallback } from 'react';
 import MessageList from './MessageList';
 import MessageInput from './MessageInput';
-import type { Message, ChatRequest, ChatResponse, ChatError } from '@/types/chat';
+import type { Message, ChatRequest, ChatResponse, ChatError, ImageUploadData, TextContent } from '@/types/chat';
 
 export default function ChatInterface() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSendMessage = useCallback(async (message: string) => {
-    // ユーザーメッセージを追加
-    const userMessage: Message = {
-      role: 'user',
-      content: message,
-    };
+  const handleSendMessage = useCallback(async (message: string, image?: ImageUploadData) => {
+    // ユーザーメッセージを追加（画像がある場合はマルチモーダル形式）
+    const userMessage: Message = image
+      ? {
+          role: 'user',
+          content: [
+            {
+              type: 'text',
+              text: message,
+            } as TextContent,
+            image.imageContent,
+          ],
+        }
+      : {
+          role: 'user',
+          content: message,
+        };
 
     setMessages((prev) => [...prev, userMessage]);
     setIsLoading(true);
@@ -26,6 +37,7 @@ export default function ChatInterface() {
       const requestBody: ChatRequest = {
         message,
         conversationHistory: messages,
+        image: image?.imageContent,
       };
 
       const response = await fetch('/api/chat', {

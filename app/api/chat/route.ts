@@ -44,7 +44,7 @@ function validateRequest(body: unknown): body is ChatRequest {
     return false;
   }
 
-  const { message, conversationHistory } = body as ChatRequest;
+  const { message, conversationHistory, image } = body as ChatRequest;
 
   if (typeof message !== 'string' || !message.trim()) {
     return false;
@@ -59,8 +59,24 @@ function validateRequest(body: unknown): body is ChatRequest {
     if (
       !msg ||
       typeof msg !== 'object' ||
-      (msg.role !== 'user' && msg.role !== 'assistant') ||
-      typeof msg.content !== 'string'
+      (msg.role !== 'user' && msg.role !== 'assistant')
+    ) {
+      return false;
+    }
+    // contentは文字列または配列
+    if (typeof msg.content !== 'string' && !Array.isArray(msg.content)) {
+      return false;
+    }
+  }
+
+  // 画像が含まれている場合のバリデーション
+  if (image) {
+    if (
+      !image.type ||
+      image.type !== 'image' ||
+      !image.source ||
+      !image.source.data ||
+      !image.source.media_type
     ) {
       return false;
     }
@@ -96,31 +112,53 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(errorResponse, { status: 400 });
     }
 
-    const { message, conversationHistory } = body;
+    const { message, conversationHistory, image } = body;
 
     // 入力のサニタイゼーション
     const sanitizedMessage = sanitizeInput(message);
 
-    // 会話履歴をMastra形式に変換
+    // 会話履歴をMastra/Claude API形式に変換
     const messages = [
       ...conversationHistory.map((msg) => ({
         role: msg.role,
-        content: sanitizeInput(msg.content),
+        content:
+          typeof msg.content === 'string'
+            ? sanitizeInput(msg.content)
+            : msg.content,
       })),
       {
         role: 'user' as const,
-        content: sanitizedMessage,
+        content: image
+          ? [
+              {
+                type: 'text' as const,
+                text: sanitizedMessage,
+              },
+              image,
+            ]
+          : sanitizedMessage,
       },
     ];
 
     // チャットエージェントを取得
     const agent = getChatAgent();
 
-    // AI応答を生成
-    const result = await agent.generate(sanitizedMessage, {
-      // 会話履歴をコンテキストとして渡す
-      // 注: Mastraのバージョンによって異なる可能性があります
-    });
+    // AI応答を生成（マルチモーダル対応）
+    const result = await agent.generate(
+      image
+        ? [
+            {
+              type: 'text' as const,
+              text: sanitizedMessage,
+            },
+            image,
+          ]
+        : sanitizedMessage,
+      {
+        // 会話履歴をコンテキストとして渡す
+        // 注: Mastraのバージョンによって異なる可能性があります
+      }
+    );
 
     // レスポンスの構築
     const response: ChatResponse = {

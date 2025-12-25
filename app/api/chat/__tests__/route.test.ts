@@ -578,4 +578,354 @@ describe('/api/chat', () => {
       expect(response.status).toBeGreaterThanOrEqual(400);
     });
   });
+
+  describe('POST endpoint - Multimodal support', () => {
+    it('accepts request with valid image attachment', async () => {
+      // Given: Request with image content
+      const requestBody: ChatRequest = {
+        message: 'What is in this image?',
+        conversationHistory: [],
+        image: {
+          type: 'image',
+          source: {
+            type: 'base64',
+            media_type: 'image/png',
+            data: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+          },
+        },
+      };
+
+      const request = createMockRequest('/api/chat', {
+        method: 'POST',
+        body: JSON.stringify(requestBody),
+        headers: {
+          'Content-Type': 'application/json',
+          'x-forwarded-for': getUniqueTestIP(),
+        },
+      });
+
+      // When: POST handler is called
+      const response = await POST(request);
+
+      // Then: Should process successfully
+      expect(response.status).toBe(200);
+      const data: ChatResponse = await response.json();
+      expect(data).toHaveProperty('response');
+      expect(data).toHaveProperty('timestamp');
+    });
+
+    it('accepts request with JPEG image', async () => {
+      // Given: Request with JPEG image
+      const requestBody: ChatRequest = {
+        message: 'Describe this photo',
+        conversationHistory: [],
+        image: {
+          type: 'image',
+          source: {
+            type: 'base64',
+            media_type: 'image/jpeg',
+            data: '/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFAABAAAAAAAAAAAAAAAAAAAAA//aAAgBAQABPwBH/9k=',
+          },
+        },
+      };
+
+      const request = createMockRequest('/api/chat', {
+        method: 'POST',
+        body: JSON.stringify(requestBody),
+        headers: {
+          'Content-Type': 'application/json',
+          'x-forwarded-for': getUniqueTestIP(),
+        },
+      });
+
+      // When: POST handler is called
+      const response = await POST(request);
+
+      // Then: Should process successfully
+      expect(response.status).toBe(200);
+    });
+
+    it('accepts request with GIF image', async () => {
+      // Given: Request with GIF image
+      const requestBody: ChatRequest = {
+        message: 'What is this?',
+        conversationHistory: [],
+        image: {
+          type: 'image',
+          source: {
+            type: 'base64',
+            media_type: 'image/gif',
+            data: 'R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==',
+          },
+        },
+      };
+
+      const request = createMockRequest('/api/chat', {
+        method: 'POST',
+        body: JSON.stringify(requestBody),
+        headers: {
+          'Content-Type': 'application/json',
+          'x-forwarded-for': getUniqueTestIP(),
+        },
+      });
+
+      // When: POST handler is called
+      const response = await POST(request);
+
+      // Then: Should process successfully
+      expect(response.status).toBe(200);
+    });
+
+    it('accepts request with WebP image', async () => {
+      // Given: Request with WebP image
+      const requestBody: ChatRequest = {
+        message: 'Analyze this image',
+        conversationHistory: [],
+        image: {
+          type: 'image',
+          source: {
+            type: 'base64',
+            media_type: 'image/webp',
+            data: 'UklGRiQAAABXRUJQVlA4IBgAAAAwAQCdASoBAAEAAwA0JaQAA3AA/vuUAAA=',
+          },
+        },
+      };
+
+      const request = createMockRequest('/api/chat', {
+        method: 'POST',
+        body: JSON.stringify(requestBody),
+        headers: {
+          'Content-Type': 'application/json',
+          'x-forwarded-for': getUniqueTestIP(),
+        },
+      });
+
+      // When: POST handler is called
+      const response = await POST(request);
+
+      // Then: Should process successfully
+      expect(response.status).toBe(200);
+    });
+
+    it('handles conversation history with multimodal content', async () => {
+      // Given: Request with image and conversation history containing multimodal content
+      const requestBody: ChatRequest = {
+        message: 'And this one?',
+        conversationHistory: [
+          {
+            role: 'user',
+            content: [
+              { type: 'text', text: 'What is in this image?' },
+              {
+                type: 'image',
+                source: {
+                  type: 'base64',
+                  media_type: 'image/png',
+                  data: 'previous-image-data',
+                },
+              },
+            ],
+          },
+          { role: 'assistant', content: 'I see a cat in the image.' },
+        ],
+        image: {
+          type: 'image',
+          source: {
+            type: 'base64',
+            media_type: 'image/png',
+            data: 'new-image-data',
+          },
+        },
+      };
+
+      const request = createMockRequest('/api/chat', {
+        method: 'POST',
+        body: JSON.stringify(requestBody),
+        headers: {
+          'Content-Type': 'application/json',
+          'x-forwarded-for': getUniqueTestIP(),
+        },
+      });
+
+      // When: POST handler is called
+      const response = await POST(request);
+
+      // Then: Should process successfully
+      expect(response.status).toBe(200);
+      const data: ChatResponse = await response.json();
+      expect(data.response).toBeTruthy();
+    });
+
+    it('rejects request with invalid image structure (missing type)', async () => {
+      // Given: Request with invalid image (missing type field)
+      const requestBody = {
+        message: 'What is this?',
+        conversationHistory: [],
+        image: {
+          source: {
+            type: 'base64',
+            media_type: 'image/png',
+            data: 'test-data',
+          },
+        },
+      };
+
+      const request = createMockRequest('/api/chat', {
+        method: 'POST',
+        body: JSON.stringify(requestBody),
+        headers: {
+          'Content-Type': 'application/json',
+          'x-forwarded-for': getUniqueTestIP(),
+        },
+      });
+
+      // When: POST handler is called
+      const response = await POST(request);
+
+      // Then: Should return 400 error
+      expect(response.status).toBe(400);
+    });
+
+    it('rejects request with invalid image structure (missing source)', async () => {
+      // Given: Request with invalid image (missing source)
+      const requestBody = {
+        message: 'What is this?',
+        conversationHistory: [],
+        image: {
+          type: 'image',
+        },
+      };
+
+      const request = createMockRequest('/api/chat', {
+        method: 'POST',
+        body: JSON.stringify(requestBody),
+        headers: {
+          'Content-Type': 'application/json',
+          'x-forwarded-for': getUniqueTestIP(),
+        },
+      });
+
+      // When: POST handler is called
+      const response = await POST(request);
+
+      // Then: Should return 400 error
+      expect(response.status).toBe(400);
+    });
+
+    it('rejects request with invalid image structure (missing data)', async () => {
+      // Given: Request with invalid image (missing base64 data)
+      const requestBody = {
+        message: 'What is this?',
+        conversationHistory: [],
+        image: {
+          type: 'image',
+          source: {
+            type: 'base64',
+            media_type: 'image/png',
+          },
+        },
+      };
+
+      const request = createMockRequest('/api/chat', {
+        method: 'POST',
+        body: JSON.stringify(requestBody),
+        headers: {
+          'Content-Type': 'application/json',
+          'x-forwarded-for': getUniqueTestIP(),
+        },
+      });
+
+      // When: POST handler is called
+      const response = await POST(request);
+
+      // Then: Should return 400 error
+      expect(response.status).toBe(400);
+    });
+
+    it('rejects request with invalid image structure (missing media_type)', async () => {
+      // Given: Request with invalid image (missing media_type)
+      const requestBody = {
+        message: 'What is this?',
+        conversationHistory: [],
+        image: {
+          type: 'image',
+          source: {
+            type: 'base64',
+            data: 'test-data',
+          },
+        },
+      };
+
+      const request = createMockRequest('/api/chat', {
+        method: 'POST',
+        body: JSON.stringify(requestBody),
+        headers: {
+          'Content-Type': 'application/json',
+          'x-forwarded-for': getUniqueTestIP(),
+        },
+      });
+
+      // When: POST handler is called
+      const response = await POST(request);
+
+      // Then: Should return 400 error
+      expect(response.status).toBe(400);
+    });
+
+    it('rejects request with wrong image type value', async () => {
+      // Given: Request with wrong type value
+      const requestBody = {
+        message: 'What is this?',
+        conversationHistory: [],
+        image: {
+          type: 'video',
+          source: {
+            type: 'base64',
+            media_type: 'image/png',
+            data: 'test-data',
+          },
+        },
+      };
+
+      const request = createMockRequest('/api/chat', {
+        method: 'POST',
+        body: JSON.stringify(requestBody),
+        headers: {
+          'Content-Type': 'application/json',
+          'x-forwarded-for': getUniqueTestIP(),
+        },
+      });
+
+      // When: POST handler is called
+      const response = await POST(request);
+
+      // Then: Should return 400 error
+      expect(response.status).toBe(400);
+    });
+
+    it('accepts request without image (backward compatibility)', async () => {
+      // Given: Request without image field (text-only)
+      const requestBody: ChatRequest = {
+        message: 'Hello, AI!',
+        conversationHistory: [],
+      };
+
+      const request = createMockRequest('/api/chat', {
+        method: 'POST',
+        body: JSON.stringify(requestBody),
+        headers: {
+          'Content-Type': 'application/json',
+          'x-forwarded-for': getUniqueTestIP(),
+        },
+      });
+
+      // When: POST handler is called
+      const response = await POST(request);
+
+      // Then: Should process successfully (backward compatibility)
+      expect(response.status).toBe(200);
+      const data: ChatResponse = await response.json();
+      expect(data.response).toBeTruthy();
+    });
+  });
 });
