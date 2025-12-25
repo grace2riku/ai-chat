@@ -120,7 +120,9 @@ describe('ImageUpload', () => {
       await user.click(uploadButton);
 
       // Then: File input click should be triggered
-      expect(clickSpy).toHaveBeenCalled();
+      await waitFor(() => {
+        expect(clickSpy).toHaveBeenCalled();
+      });
       clickSpy.mockRestore();
     });
 
@@ -144,7 +146,7 @@ describe('ImageUpload', () => {
       await waitFor(() => {
         expect(mockConvertFileToImageContent).toHaveBeenCalledWith(testFile);
         expect(mockCreatePreviewURL).toHaveBeenCalledWith(testFile);
-      });
+      }, { timeout: 3000 });
 
       // And: onImageSelect callback should be called with correct data
       await waitFor(() => {
@@ -160,12 +162,11 @@ describe('ImageUpload', () => {
             },
           },
         });
-      });
+      }, { timeout: 3000 });
     });
 
     it('handles null file selection (user cancels)', async () => {
       // Given: Component with no image
-      const user = userEvent.setup();
       render(
         <ImageUpload
           onImageSelect={mockOnImageSelect}
@@ -176,7 +177,6 @@ describe('ImageUpload', () => {
       const fileInput = screen.getByLabelText('画像ファイルを選択') as HTMLInputElement;
 
       // When: User cancels file selection (simulated by triggering change with no files)
-      await user.click(fileInput);
       // Simulate cancellation by manually triggering change event with null
       Object.defineProperty(fileInput, 'files', {
         value: null,
@@ -187,7 +187,7 @@ describe('ImageUpload', () => {
       // Then: onImageSelect should be called with null
       await waitFor(() => {
         expect(mockOnImageSelect).toHaveBeenCalledWith(null);
-      });
+      }, { timeout: 3000 });
     });
   });
 

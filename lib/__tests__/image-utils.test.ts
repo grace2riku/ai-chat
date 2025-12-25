@@ -8,6 +8,10 @@ import {
   MAX_FILE_SIZE,
 } from '../image-utils';
 
+// Mock browser APIs for URL object
+global.URL.createObjectURL = jest.fn(() => 'blob:http://localhost/mock-url');
+global.URL.revokeObjectURL = jest.fn();
+
 describe('image-utils', () => {
   describe('Constants', () => {
     it('exports correct supported image types', () => {

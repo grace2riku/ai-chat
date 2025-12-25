@@ -38,7 +38,7 @@ describe('MessageInput', () => {
       await user.click(sendButton);
 
       // Then: onSendMessage should be called with trimmed text
-      expect(mockOnSendMessage).toHaveBeenCalledWith('Test message');
+      expect(mockOnSendMessage).toHaveBeenCalledWith('Test message', undefined);
     });
 
     it('clears input after sending message', async () => {
@@ -163,7 +163,7 @@ describe('MessageInput', () => {
       await user.click(sendButton);
 
       // Then: onSendMessage should be called with the message
-      expect(mockOnSendMessage).toHaveBeenCalledWith('Form submit test');
+      expect(mockOnSendMessage).toHaveBeenCalledWith('Form submit test', undefined);
       // Note: Called twice due to button onClick and form onSubmit, which is expected behavior
     });
 
@@ -210,7 +210,7 @@ describe('MessageInput', () => {
       await user.keyboard('{Enter}');
 
       // Then: Message should be sent
-      expect(mockOnSendMessage).toHaveBeenCalledWith('Enter key test');
+      expect(mockOnSendMessage).toHaveBeenCalledWith('Enter key test', undefined);
     });
 
     it('does not send message when Shift+Enter is pressed', async () => {
@@ -288,7 +288,7 @@ describe('MessageInput', () => {
       await user.keyboard('{Enter}');
 
       // Then: Message should be sent
-      expect(mockOnSendMessage).toHaveBeenCalledWith('こんにちは');
+      expect(mockOnSendMessage).toHaveBeenCalledWith('こんにちは', undefined);
     });
   });
 
