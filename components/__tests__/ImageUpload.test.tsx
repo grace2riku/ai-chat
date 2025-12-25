@@ -12,6 +12,11 @@ describe('ImageUpload', () => {
     jest.clearAllMocks();
   });
 
+  afterEach(() => {
+    // Restore all spies after each test to prevent redefinition errors
+    jest.restoreAllMocks();
+  });
+
   describe('Initial rendering', () => {
     it('renders image upload button when no image is selected', () => {
       // Given: No current image
@@ -108,7 +113,6 @@ describe('ImageUpload', () => {
       await waitFor(() => {
         expect(clickSpy).toHaveBeenCalled();
       });
-      clickSpy.mockRestore();
     });
 
     it('processes valid image file selection successfully', async () => {
@@ -143,9 +147,6 @@ describe('ImageUpload', () => {
         expect(callArg.file).toBe(testFile);
         expect(callArg.imageContent.type).toBe('image');
       }, { timeout: 3000 });
-
-      convertSpy.mockRestore();
-      previewSpy.mockRestore();
     });
 
     it('handles null file selection (user cancels)', async () => {
@@ -203,8 +204,6 @@ describe('ImageUpload', () => {
 
       // And: onImageSelect should be called with null (resetting state)
       expect(mockOnImageSelect).toHaveBeenCalledWith(null);
-
-      alertSpy.mockRestore();
     });
 
     it('displays error alert when image processing fails with file size exceeded', async () => {
@@ -236,8 +235,6 @@ describe('ImageUpload', () => {
 
       // And: onImageSelect should be called with null
       expect(mockOnImageSelect).toHaveBeenCalledWith(null);
-
-      alertSpy.mockRestore();
     });
 
     it('displays generic error message for non-Error exceptions', async () => {
@@ -268,9 +265,6 @@ describe('ImageUpload', () => {
 
       // And: onImageSelect should be called with null
       expect(mockOnImageSelect).toHaveBeenCalledWith(null);
-
-      alertSpy.mockRestore();
-      convertSpy.mockRestore();
     });
   });
 
