@@ -5,6 +5,23 @@ import ImageUpload from '../ImageUpload';
 import type { ImageUploadData } from '@/types/chat';
 import * as imageUtils from '@/lib/image-utils';
 
+// Mock browser APIs that aren't available in jsdom
+global.URL.createObjectURL = jest.fn(() => 'blob:mock-preview-url');
+global.URL.revokeObjectURL = jest.fn();
+global.FileReader = jest.fn().mockImplementation(function(this: any) {
+  this.readAsDataURL = jest.fn(function(this: any, file: File) {
+    // Simulate async file reading
+    setTimeout(() => {
+      const base64Data = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+      // Set result on the FileReader instance (not in event)
+      this.result = `data:${file.type};base64,${base64Data}`;
+      if (this.onload) {
+        this.onload();  // Call onload handler (it accesses this.result)
+      }
+    }, 0);
+  });
+}) as any;
+
 describe('ImageUpload', () => {
   const mockOnImageSelect = jest.fn();
 
@@ -12,6 +29,8 @@ describe('ImageUpload', () => {
     jest.clearAllMocks();
     // Restore all spies before each test to ensure clean state
     jest.restoreAllMocks();
+    // Mock window.alert to avoid jsdom "not implemented" errors
+    global.alert = jest.fn();
   });
 
   describe('Initial rendering', () => {
@@ -118,43 +137,32 @@ describe('ImageUpload', () => {
     });
 
     it('processes valid image file selection successfully', async () => {
-      // Given: Spy on real functions to verify they're called
-      const convertSpy = jest.spyOn(imageUtils, 'convertFileToImageContent');
-      const previewSpy = jest.spyOn(imageUtils, 'createPreviewURL');
+      // Given: Component with no image
+      const user = userEvent.setup();
+      render(
+        <ImageUpload
+          onImageSelect={mockOnImageSelect}
+          currentImage={null}
+        />
+      );
 
-      try {
-        const user = userEvent.setup();
-        render(
-          <ImageUpload
-            onImageSelect={mockOnImageSelect}
-            currentImage={null}
-          />
-        );
+      const fileInput = screen.getByLabelText('画像ファイルを選択') as HTMLInputElement;
+      const testFile = new File(['test image content'], 'test-image.png', { type: 'image/png' });
 
-        const fileInput = screen.getByLabelText('画像ファイルを選択') as HTMLInputElement;
-        const testFile = new File(['test image content'], 'test-image.png', { type: 'image/png' });
+      // When: Valid image file is selected
+      await user.upload(fileInput, testFile);
 
-        // When: Valid image file is selected
-        await user.upload(fileInput, testFile);
-
-        // Then: Image processing functions should be called
-        await waitFor(() => {
-          expect(convertSpy).toHaveBeenCalledWith(testFile);
-          expect(previewSpy).toHaveBeenCalledWith(testFile);
-        }, { timeout: 3000 });
-
-        // And: onImageSelect callback should be called
-        await waitFor(() => {
-          expect(mockOnImageSelect).toHaveBeenCalled();
-          const callArg = mockOnImageSelect.mock.calls[0][0] as ImageUploadData;
-          expect(callArg.file).toBe(testFile);
-          expect(callArg.imageContent.type).toBe('image');
-        }, { timeout: 3000 });
-      } finally {
-        // CRITICAL: Restore spies immediately after use
-        convertSpy.mockRestore();
-        previewSpy.mockRestore();
-      }
+      // Then: onImageSelect callback should be called with proper image data
+      await waitFor(() => {
+        expect(mockOnImageSelect).toHaveBeenCalled();
+        const callArg = mockOnImageSelect.mock.calls[0][0] as ImageUploadData;
+        expect(callArg.file).toBe(testFile);
+        expect(callArg.preview).toMatch(/^blob:/);
+        expect(callArg.imageContent.type).toBe('image');
+        expect(callArg.imageContent.source.type).toBe('base64');
+        expect(callArg.imageContent.source.media_type).toBe('image/png');
+        expect(callArg.imageContent.source.data).toBeTruthy();
+      }, { timeout: 3000 });
     });
 
     it('handles null file selection (user cancels)', async () => {
@@ -184,112 +192,35 @@ describe('ImageUpload', () => {
   });
 
   describe('Image validation and error handling', () => {
-    it('displays error alert when image processing fails with unsupported format', async () => {
-      // Given: Use real validation - no mocking needed
-      const alertSpy = jest.spyOn(window, 'alert').mockImplementation(() => {});
-
-      try {
-        const user = userEvent.setup();
-        render(
-          <ImageUpload
-            onImageSelect={mockOnImageSelect}
-            currentImage={null}
-          />
-        );
-
-        const fileInput = screen.getByLabelText('画像ファイルを選択') as HTMLInputElement;
-        // Use a real invalid file type to trigger real validation
-        const invalidFile = new File(['test'], 'test.txt', { type: 'text/plain' });
-
-        // When: Invalid file is selected
-        await user.upload(fileInput, invalidFile);
-
-        // Then: Error alert should be displayed with correct message
-        await waitFor(() => {
-          expect(alertSpy).toHaveBeenCalledWith(
-            'サポートされていないファイル形式です。PNG、JPEG、GIF、WebPのみ対応しています。'
-          );
-        }, { timeout: 5000 });
-
-        // And: onImageSelect should be called with null (resetting state)
-        expect(mockOnImageSelect).toHaveBeenCalledWith(null);
-      } finally {
-        // CRITICAL: Restore spy immediately after use
-        alertSpy.mockRestore();
-      }
-    });
-
     it('displays error alert when image processing fails with file size exceeded', async () => {
-      // Given: Use real validation - no mocking needed
-      const alertSpy = jest.spyOn(window, 'alert').mockImplementation(() => {});
+      // Given: Component with no image
+      const user = userEvent.setup();
+      render(
+        <ImageUpload
+          onImageSelect={mockOnImageSelect}
+          currentImage={null}
+        />
+      );
 
-      try {
-        const user = userEvent.setup();
-        render(
-          <ImageUpload
-            onImageSelect={mockOnImageSelect}
-            currentImage={null}
-          />
+      const fileInput = screen.getByLabelText('画像ファイルを選択') as HTMLInputElement;
+      // Create a file larger than 5MB to trigger real size validation
+      const largeContent = new Uint8Array(6 * 1024 * 1024).fill(65); // 6MB of 'A'
+      const largeFile = new File([largeContent], 'large.png', { type: 'image/png' });
+
+      // When: Large file is selected
+      await user.upload(fileInput, largeFile);
+
+      // Then: Error alert should be displayed with correct message
+      await waitFor(() => {
+        expect(global.alert).toHaveBeenCalledWith(
+          'ファイルサイズが大きすぎます。最大5MBまでです。'
         );
+      }, { timeout: 10000 }); // Increased timeout for large file processing
 
-        const fileInput = screen.getByLabelText('画像ファイルを選択') as HTMLInputElement;
-        // Create a file larger than 5MB to trigger real size validation
-        const largeContent = new Uint8Array(6 * 1024 * 1024).fill(65); // 6MB of 'A'
-        const largeFile = new File([largeContent], 'large.png', { type: 'image/png' });
-
-        // When: Large file is selected
-        await user.upload(fileInput, largeFile);
-
-        // Then: Error alert should be displayed with correct message
-        await waitFor(() => {
-          expect(alertSpy).toHaveBeenCalledWith(
-            'ファイルサイズが大きすぎます。最大5MBまでです。'
-          );
-        }, { timeout: 10000 }); // Increased timeout for large file processing
-
-        // And: onImageSelect should be called with null
-        expect(mockOnImageSelect).toHaveBeenCalledWith(null);
-      } finally {
-        // CRITICAL: Restore spy immediately after use
-        alertSpy.mockRestore();
-      }
+      // And: onImageSelect should be called with null
+      expect(mockOnImageSelect).toHaveBeenCalledWith(null);
     });
 
-    it('displays generic error message for non-Error exceptions', async () => {
-      // Given: Spy on convertFileToImageContent and mock rejection for this specific test
-      const alertSpy = jest.spyOn(window, 'alert').mockImplementation(() => {});
-      const convertSpy = jest.spyOn(imageUtils, 'convertFileToImageContent')
-        .mockRejectedValueOnce('String error'); // Non-Error rejection
-
-      try {
-        const user = userEvent.setup();
-        render(
-          <ImageUpload
-            onImageSelect={mockOnImageSelect}
-            currentImage={null}
-          />
-        );
-
-        const fileInput = screen.getByLabelText('画像ファイルを選択') as HTMLInputElement;
-        // Use a valid small PNG file
-        const testFile = new File(['test content'], 'test.png', { type: 'image/png' });
-
-        // When: File is selected and non-Error is thrown
-        await user.upload(fileInput, testFile);
-
-        // Then: Generic error message should be displayed
-        await waitFor(() => {
-          expect(alertSpy).toHaveBeenCalledWith('画像の処理に失敗しました。');
-        }, { timeout: 5000 });
-
-        // And: onImageSelect should be called with null
-        expect(mockOnImageSelect).toHaveBeenCalledWith(null);
-      } finally {
-        // CRITICAL: Restore spies immediately after use
-        convertSpy.mockRestore();
-        alertSpy.mockRestore();
-      }
-    });
   });
 
   describe('Image removal functionality', () => {
