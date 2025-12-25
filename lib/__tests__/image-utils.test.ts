@@ -9,7 +9,8 @@ import {
 } from '../image-utils';
 
 // Mock browser APIs for URL object
-global.URL.createObjectURL = jest.fn(() => 'blob:http://localhost/mock-url');
+let mockUrlCounter = 0;
+global.URL.createObjectURL = jest.fn(() => `blob:http://localhost/mock-url-${mockUrlCounter++}`);
 global.URL.revokeObjectURL = jest.fn();
 
 describe('image-utils', () => {

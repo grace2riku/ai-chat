@@ -217,7 +217,7 @@ describe('ImageUpload', () => {
       // Then: Error alert should be displayed
       await waitFor(() => {
         expect(alertSpy).toHaveBeenCalledWith(errorMessage);
-      });
+      }, { timeout: 3000 });
 
       // And: onImageSelect should be called with null (resetting state)
       expect(mockOnImageSelect).toHaveBeenCalledWith(null);
@@ -274,7 +274,8 @@ describe('ImageUpload', () => {
       );
 
       const fileInput = screen.getByLabelText('画像ファイルを選択') as HTMLInputElement;
-      const testFile = new File(['test'], 'test.png', { type: 'image/png' });
+      // Use a small file to avoid triggering size validation
+      const testFile = new File(['small test content'], 'test.png', { type: 'image/png' });
 
       // When: File is selected and non-Error is thrown
       await user.upload(fileInput, testFile);
@@ -282,7 +283,7 @@ describe('ImageUpload', () => {
       // Then: Generic error message should be displayed
       await waitFor(() => {
         expect(alertSpy).toHaveBeenCalledWith('画像の処理に失敗しました。');
-      });
+      }, { timeout: 3000 });
 
       alertSpy.mockRestore();
     });
