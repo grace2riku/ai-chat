@@ -157,6 +157,13 @@ make deploy
   - mainブランチへのpush時に実行
   - テスト → Cloud Buildでビルド → Cloud Runへデプロイ
 
+## ドキュメント
+
+- [API ドキュメント](./API.md) - APIエンドポイントの詳細仕様
+- [コントリビューションガイド](./CONTRIBUTING.md) - プロジェクトへの貢献方法
+- [デプロイメントガイド](./DEPLOYMENT.md) - Google Cloud Runへのデプロイ手順
+- [CI/CDセットアップガイド](./.github/workflows/SETUP.md) - GitHub Actionsの設定方法
+
 ## プロジェクト構成
 
 ```
