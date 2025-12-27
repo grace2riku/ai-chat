@@ -117,48 +117,45 @@ export async function POST(request: NextRequest) {
     // 入力のサニタイゼーション
     const sanitizedMessage = sanitizeInput(message);
 
-    // 会話履歴をMastra/Claude API形式に変換
-    const messages = [
-      ...conversationHistory.map((msg) => ({
-        role: msg.role,
-        content:
-          typeof msg.content === 'string'
-            ? sanitizeInput(msg.content)
-            : msg.content,
-      })),
-      {
-        role: 'user' as const,
-        content: image
-          ? [
-              {
-                type: 'text' as const,
-                text: sanitizedMessage,
-              },
-              image,
-            ]
-          : sanitizedMessage,
-      },
-    ];
+    // 会話履歴をMastra形式に変換
+    const historyMessages = conversationHistory.map((msg) => ({
+      role: msg.role,
+      content:
+        typeof msg.content === 'string'
+          ? sanitizeInput(msg.content)
+          : msg.content,
+    }));
 
-    // チャットエージェントを取得
-    const agent = getChatAgent();
-
-    // AI応答を生成（マルチモーダル対応）
-    const result = await agent.generate(
-      image
-        ? [
+    // 現在のメッセージを作成（マルチモーダル対応）
+    const currentMessage = image
+      ? {
+          role: 'user' as const,
+          content: [
             {
               type: 'text' as const,
               text: sanitizedMessage,
             },
-            image,
-          ]
-        : sanitizedMessage,
-      {
-        // 会話履歴をコンテキストとして渡す
-        // 注: Mastraのバージョンによって異なる可能性があります
-      }
-    );
+            {
+              type: 'image' as const,
+              image: `data:${image.source.media_type};base64,${image.source.data}`,
+              mimeType: image.source.media_type,
+            },
+          ],
+        }
+      : {
+          role: 'user' as const,
+          content: sanitizedMessage,
+        };
+
+    // 会話履歴と現在のメッセージを結合
+    const messages = [...historyMessages, currentMessage];
+
+    // チャットエージェントを取得
+    const agent = getChatAgent();
+
+    // AI応答を生成（会話履歴を含む）
+    // Note: Type assertion needed for Mastra CoreMessage compatibility
+    const result = await agent.generate(messages as any);
 
     // レスポンスの構築
     const response: ChatResponse = {

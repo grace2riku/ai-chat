@@ -9,9 +9,33 @@ import type { ChatRequest, ChatResponse, ChatError } from '@/types/chat';
 // Mock the Mastra agent
 jest.mock('@/lib/mastra/agent', () => ({
   getChatAgent: jest.fn(() => ({
-    generate: jest.fn(async (message: string) => ({
-      text: `Mock response to: ${message}`,
-    })),
+    generate: jest.fn(async (messages: any) => {
+      // Handle both string and array inputs
+      let messageText: string;
+
+      if (typeof messages === 'string') {
+        messageText = messages;
+      } else if (Array.isArray(messages)) {
+        const lastMessage = messages[messages.length - 1];
+        if (lastMessage && lastMessage.content) {
+          // Handle multimodal content (array) or simple string content
+          if (Array.isArray(lastMessage.content)) {
+            const textContent = lastMessage.content.find((c: any) => c.type === 'text');
+            messageText = textContent?.text || String(lastMessage.content);
+          } else {
+            messageText = String(lastMessage.content);
+          }
+        } else {
+          messageText = String(messages);
+        }
+      } else {
+        messageText = String(messages);
+      }
+
+      return {
+        text: `Mock response to: ${messageText}`,
+      };
+    }),
   })),
 }));
 
